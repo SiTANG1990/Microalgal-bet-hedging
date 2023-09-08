@@ -1,0 +1,43 @@
+# nutrient dynamics overtime
+library(readxl)
+ library(ggpubr)
+ library(rstatix)
+ library(ggplot2)
+ library(dplyr)
+ ST <- read_excel("C:/Users/Si/Desktop/ST2.xlsx", sheet = "Sheet16")
+ attach(ST)
+
+plot <- ggline(ST, x = "time", y = "number", add = "mean_sd",
+                                 fill = "type",
+                                  size =1.5,
+                                  palette = c('#c6dbef','#4292c6','#ccebc5','#decbe4','#fed9a6','#ffffcc'),
+                                    facet.by = "type",
+                                   )+
+     stat_compare_means(
+                            label = "p.signif", 
+                          ref.group = "Day 0",
+                          label.y = (600),
+                          label.x = (1.5), method = "t.test",size = 15)
+ 
+   plot
+
+   plot+ 
+     xlab("Time (day)")+
+     ylab(~ paste("Nutrient concentration ",(mg ~ L ^ -1)))+
+     ylim(0,650)+
+     theme(legend.title=element_blank())+
+     theme(legend.position = c(0.06,0.96),
+                     legend.text=element_text(size=25))+
+     theme(panel.grid = element_blank(),
+                     panel.border = element_rect(colour = "black", fill=NA, size=2))+
+     theme(axis.text=element_text(size=45, colour = "black"),
+                     axis.title=element_text(size=50,colour = "black")
+           )+
+     theme(axis.text.x = element_text(angle = 0, vjust = 0.5))+
+     theme(strip.text.x = element_text(size = 50),strip.text.y = element_text(size = 40))+
+     scale_x_discrete(labels = c(expression(0),expression(5),expression(15), 
+                                                    expression(20)))+
+     theme(axis.ticks = element_line(size = 2,colour = "black"))+
+     theme(axis.ticks.length=unit(0.4, "cm"))+
+    theme()
+   ggsave('C:/Users/Si/Desktop/ggplot05.jpg', width =40, height =40, units = "cm",dpi = 300)
