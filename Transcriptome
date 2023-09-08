@@ -1,0 +1,134 @@
+# upregulated or downregulated genes
+library(readxl)
+ST <- read_excel("C:/Users/Si/Desktop/ST2.xlsx", sheet = "Sheet18")
+attach(ST)
+
+library(reshape2)
+library(dplyr)
+ST
+library(ggplot2)
+library(scales)
+plot = ggplot(ST,aes(fill=gene, y= number,x=gene))+
+  geom_bar(stat = "identity", color = "black", position=position_dodge(), width =0.6,size=1.5)+
+  geom_text(aes(label = number), vjust = -0.5, size=18 )+
+  ylab("Number of DEGs")+
+  xlab("")+
+  scale_fill_manual(values = c('#a6cee3','#fb9a99','#6baed6','#feedde'))+
+  scale_y_continuous(
+    limits = c(0,3500),
+    breaks = seq(0, 3500, by=500),
+    )+
+
+  theme_light()+
+  theme(legend.position = "none")+
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(axis.text=element_text(size=40, colour = "black"),
+        axis.title=element_text(size=50,colour = "black"),
+        )+
+  
+  theme(strip.text.x = element_text(size = 40),strip.text.y = element_text(size = 40))+
+
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(axis.ticks = element_line(size = 2,colour = "black"))+
+  theme(axis.ticks.length=unit(0.4, "cm"))+
+  theme(axis.text.y=element_text(size=54, colour = "black"),
+        axis.text.x=element_text(size=40, colour = "black"),
+        axis.title=element_text(size=65,colour = "black"))+
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.6))
+
+ggsave('C:/Users/Si/Desktop/ggplot06.jpg', width =27, height =40, units = "cm",dpi = 300)
+
+# Enrichment analysis
+library(readxl)
+library(ggpubr)
+library(dplyr)
+library(rstatix)
+library(multcompView)
+ST <- read_excel("C:/Users/Si/Desktop/ST11.xlsx", sheet = "Sheet29")
+attach(ST)
+ST
+plot <- ggplot(ST, aes(rich, path,size = number, color = Pvalue)) + 
+  geom_point() +   
+  scale_color_gradient(guide=guide_colourbar(reverse = TRUE))
+plot
+plot <- plot + xlab("") + 
+  theme(panel.grid.major = element_line(colour = "lightgrey"), axis.text.y = element_text(colour = "black", size = 12),
+        axis.text.x = element_text(colour = "black", size = 12, angle = 0),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(face = "bold", size = 7),
+        panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, size = 0.7), 
+        legend.title = element_blank(),
+        legend.text = element_text(colour = "black", size = 10, face = "bold"),
+        legend.key = element_rect(fill = "white"),
+        strip.text.y = element_text(size = 7, color = "black", face = "bold"),
+        strip.text.x = element_text(size = 7, color = "black", face = "bold"),
+        strip.background.y = element_rect(color = "black", fill = "#ededed", size = 0.5, linetype = "solid"), 
+        strip.background.x = element_rect(color = "white", fill = "white", size = 0.5, linetype = "solid"))
+plot
+ggsave('C:/Users/Si/Desktop/ggplot06.jpg', width =13.5, height =10, units = "cm",dpi = 300)
+
+#Heatmap analysis
+
+library(ComplexHeatmap)
+library(grid)
+library(RColorBrewer)
+library(WGCNA)
+library(pheatmap)
+
+
+
+ST <- read.csv("C:/Users/Si/Desktop/ST8.CSV"
+           # , row.names = 1   
+               ) # only CSV file works
+attach(ST)
+ST
+dim(ST)
+
+annotation_col = data.frame(
+  Phenotype=  c(rep("Nonmobile",3),rep("Mobile",3)) 
+  ,row.names = colnames(ST)
+)
+rownames(annotation_col) = colnames(ST)
+annotation_row = data.frame(
+  Metabolism= factor(rep(c("Photosynthesis","Carotenoid", "Lipid","Starch"), c(7,6,10,7)))
+)
+rownames(annotation_row) = row.names(ST)
+
+newnames <- lapply(
+  rownames(ST),
+  function(x) bquote(italic(.(x))))
+
+ann_colors = list(
+  # Time = c("white", "firebrick"),
+  Phenotype = c(Nonmobile = "#238b45", Mobile = "#c7e9c0"),
+  Metabolism = c(Photosynthesis = "#8dd3c7", Carotenoid = "#ffffb3",  Lipid = "#bebada", Starch ="#fccde5")
+)
+
+plot = pheatmap(as.matrix(ST)
+                ,scale="row",
+                annotation_col = annotation_col, annotation_row = annotation_row, 
+                annotation_colors = ann_colors,
+                row_names_gp = gpar(fontsize = 20),
+                color = colorRampPalette(c("#6495ED", "white", "#d87474"))(50),
+                cutree_rows = 2,
+                cutree_cols = 2,
+                #show_colnames = FALSE,
+                fontsize=14,
+                fontsize_col = 14,
+                cluster_rows=FALSE,
+                angle_col =45,
+                legend_breaks = c(-1, 0, 1),
+                treeheight_col = 10,
+                gaps_row = c(7, 13,23),
+                cellwidth = 40, cellheight = 20,
+                labels_row = as.expression(newnames)
+)
+save_pheatmap_png <- function(x, filename, width=2600, height=3000, res = 300) {
+  png(filename, width = width, height = height, res = res)
+  grid::grid.newpage()
+  grid::grid.draw(x$gtable)
+  dev.off()
+}
+
+save_pheatmap_png(plot, "my_heatmap.png")
