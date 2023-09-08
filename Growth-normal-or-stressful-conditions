@@ -1,1 +1,304 @@
+# Standard conditions
+library(readxl)
+ST <- read_excel("C:/Users/Si/Desktop/ST2.xlsx", sheet = "Sheet20")
+attach(ST)
 
+library(reshape2)
+library(dplyr)
+library(ggplot2)
+library(scales)
+melted <- melt(ST, id.vars=c("time", "type"))
+grouped <- group_by(melted,time,type)
+grouped$time = factor(grouped$time)
+grouped$type <- factor(grouped$type, 
+                         levels = c("Mobile", "M8NM2",
+                                     "M2NM8","Non-mobile"
+                                   ))
+df = summarise(grouped, avg = mean(value), sd = sd(value))
+df
+
+plot = ggplot(df,aes(y=avg,x=time,group=type))+
+  geom_point(size=6,pch=21,stroke=1.5)+
+geom_line(size = 2.5, aes(color=type))+
+  scale_color_manual(
+     values=c('#8dd3c7',
+               '#ffffb3',
+              '#bebada','#80b1d3')
+    
+  )+
+  
+  
+  geom_errorbar(aes(
+    ymin = avg-sd, 
+    ymax = avg + sd),
+    linewidth = 3, 
+    width = 0.2, 
+    position = "identity", colour= "black")
+
+plot
+
+plot +xlab("Time (day)")+
+  ylab(~ paste("Number of cells ",(mL ^ -1)))+
+  scale_y_continuous(
+      limits = c(0,1*10^5),
+     breaks = seq(0, 1*10^5, by=2*10^4),
+    label= function(x) {ifelse(x==0, "0", 
+                               parse(text=gsub("[+]", "", 
+                                               gsub("e", " %*% 10^", scientific_format()(x)))))})+
+ 
+theme_light()+
+  
+  theme(legend.title = element_blank(),legend.position = c(0.20, 0.87),
+        legend.text=element_text(size=50))+
+  theme(legend.key.size = unit(4,"line"))+
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(axis.text=element_text(size=40, colour = "black"),
+        axis.title=element_text(size=50,colour = "black"))+
+  theme(axis.text.y=element_text(size=54, colour = "black"),
+        axis.text.x=element_text(size=50, colour = "black"),
+        axis.title=element_text(size=65,colour = "black"))+
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.6))+
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(axis.ticks = element_line(size = 2,colour = "black"))+
+  theme(axis.ticks.length=unit(0.4, "cm"))+
+  guides(color = guide_legend(
+    override.aes=list(shape = 20)))
+ggsave('C:/Users/Si/Desktop/ggplot05.jpeg',width =45, height = 40, units ="cm", dpi = 300)
+
+
+# Salinity stress
+library(readxl)
+library(ggpubr)
+library(dplyr)
+library(rstatix)
+library(multcompView)
+ST <- read_excel("C:/Users/Si/Desktop/ST12.xlsx", sheet = "Sheet1")
+attach(ST)
+ST
+ST$number <- factor(ST$number, 
+                       levels = c("Mobile", "M8NM2",
+                                  "M2NM8","Nonmobile"
+                       ))
+anova <- aov(size ~ number, data = ST)
+
+tukey <- TukeyHSD(anova)
+tukey
+
+cld <- multcompLetters4(anova, tukey)
+
+Tk <- group_by(ST, number) %>%
+  summarise(mean=mean(size), quant = quantile(size, probs = 1)) %>%
+  arrange(desc(mean))
+
+cld <- as.data.frame.list(cld$number)
+Tk$cld <- cld$Letters
+Tk
+plot <- ggbarplot(ST, x = "number", y = "size",add = "mean_se",
+                  fill = "number",
+                  palette = c( '#8dd3c7',
+                               '#ffffb3',
+                               '#bebada',
+                              # '#fb8072',
+                               '#80b1d3','#fdb462','#b3de69')
+                  #,outlier.shape = NA
+                  ,size = 1.5
+                  ,width = 0.8
+                  ,add.params = list(size = 1.5)
+                  
+)+
+  geom_text(data = Tk, aes(x =number, y = quant, 
+                           label = cld), size = 15
+            , vjust=-0.5, hjust =0.5
+  )
+plot
+
+plot+ 
+  xlab("")+
+  ylab(~ paste("Survival rate "))+
+  scale_y_continuous(
+    limits = c(0,1))+
+ 
+theme(legend.title=element_blank(),
+      legend.position = c(0.9, 0.9))+
+  theme(legend.position = c(0.85, 0.92),
+        legend.text=element_text(size=45))+
+  #, legend.title=element_text(size=45)
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(axis.text=element_text(size=40, colour = "black"),
+        axis.title=element_text(size=50,colour = "black"))+
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.6))+
+  theme(strip.text.x = element_text(size = 40),strip.text.y = element_text(size = 40))+
+  theme(legend.key.size = unit(3,"line"))+
+  theme(axis.text.y=element_text(size=54, colour = "black"),
+        axis.text.x=element_text(size=50, colour = "black"),
+        axis.title=element_text(size=65,colour = "black"))+
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.6))+
+  
+  theme(axis.ticks = element_line(size = 2,colour = "black"))+
+  theme(axis.ticks.length=unit(0.4, "cm"))+ 
+ theme(legend.position = "none")
+ggsave('C:/Users/Si/Desktop/ggplot06.jpg', width =40, height =40, units = "cm",dpi = 300)
+
+#H2O2
+library(readxl)
+library(ggpubr)
+library(dplyr)
+library(rstatix)
+library(multcompView)
+ST <- read_excel("C:/Users/Si/Desktop/ST12.xlsx", sheet = "Sheet2")
+attach(ST)
+ST
+ST$number <- factor(ST$number, 
+                       levels = c("Mobile", "M8NM2",
+                                  "M2NM8","Nonmobile"
+                       ))
+anova <- aov(size ~ number, data = ST)
+
+tukey <- TukeyHSD(anova)
+tukey
+
+cld <- multcompLetters4(anova, tukey)
+
+Tk <- group_by(ST, number) %>%
+  summarise(mean=mean(size), quant = quantile(size, probs = 1)) %>%
+  arrange(desc(mean))
+
+cld <- as.data.frame.list(cld$number)
+Tk$cld <- cld$Letters
+Tk
+
+
+plot <- ggbarplot(ST, x = "number", y = "size",add = "mean_se",
+                  fill = "number",
+                  palette = c( '#8dd3c7',
+                               '#ffffb3',
+                               '#bebada',
+                              # '#fb8072',
+                               '#80b1d3','#fdb462','#b3de69')
+                  ,size = 1.5
+                  ,width = 0.8
+                  ,add.params = list(size = 1.5)
+                  
+)+
+  geom_text(data = Tk, aes(x =number, y = quant, 
+                           label = cld), size = 15
+            , vjust=-0.5, hjust =0.5
+  )
+plot
+
+plot+ 
+  xlab("")+
+  ylab(~ paste("Survival rate "))+
+  
+  scale_y_continuous(
+    limits = c(0,1))+
+theme(legend.title=element_blank(),
+      legend.position = c(0.9, 0.9))+
+  theme(legend.position = c(0.85, 0.92),
+        legend.text=element_text(size=45))+
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(axis.text=element_text(size=40, colour = "black"),
+        axis.title=element_text(size=50,colour = "black"))+
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.6))+
+  theme(strip.text.x = element_text(size = 40),strip.text.y = element_text(size = 40))+
+  theme(legend.key.size = unit(3,"line"))+
+  theme(axis.text.y=element_text(size=54, colour = "black"),
+        axis.text.x=element_text(size=50, colour = "black"),
+        axis.title=element_text(size=65,colour = "black"))+
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.6))+
+  theme(axis.ticks = element_line(size = 2,colour = "black"))+
+  theme(axis.ticks.length=unit(0.4, "cm"))+ 
+ theme(legend.position = "none")
+ggsave('C:/Users/Si/Desktop/ggplot06.jpg', width =40, height =40, units = "cm",dpi = 300)
+
+#Drought
+
+library(readxl)
+library(ggpubr)
+library(dplyr)
+library(rstatix)
+library(multcompView)
+ST <- read_excel("C:/Users/Si/Desktop/ST12.xlsx", sheet = "Sheet3")
+attach(ST)
+ST
+ST$number <- factor(ST$number, 
+                       levels = c("Mobile", "M8NM2",
+                                  "M2NM8","Nonmobile"
+                       ))
+anova <- aov(size ~ number, data = ST)
+
+tukey <- TukeyHSD(anova)
+tukey
+
+cld <- multcompLetters4(anova, tukey)
+
+Tk <- group_by(ST, number) %>%
+  summarise(mean=mean(size), quant = quantile(size, probs = 1)) %>%
+  arrange(desc(mean))
+
+cld <- as.data.frame.list(cld$number)
+Tk$cld <- cld$Letters
+Tk
+
+
+plot <- ggbarplot(ST, x = "number", y = "size",add = "mean_se",
+                  fill = "number",
+                  palette = c( '#8dd3c7',
+                               '#ffffb3',
+                               '#bebada',
+                              # '#fb8072',
+                               '#80b1d3','#fdb462','#b3de69')
+                  #,outlier.shape = NA
+                  ,size = 1.5
+                  ,width = 0.8
+                  #,position = position_dodge()
+                  #,add = "mean"
+                  ,error.plot = "upper_errorbar"
+                  ,add.params = list(size = 1.5)
+                  
+)+
+  geom_text(data = Tk, aes(x =number, y = quant, 
+                           label = cld), size = 15
+            , vjust=-0.5, hjust =0.5
+  )
+plot
+
+plot+ 
+  xlab("")+
+  ylab(~ paste("Survival rate "))+
+  
+  scale_y_continuous(
+    limits = c(0,1))+
+  
+
+theme(legend.title=element_blank(),
+      legend.position = c(0.9, 0.9))+
+  theme(legend.position = c(0.85, 0.92),
+        legend.text=element_text(size=45))+
+ 
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+ 
+  theme(axis.text=element_text(size=40, colour = "black"),
+        axis.title=element_text(size=50,colour = "black"))+
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.6))+
+  theme(strip.text.x = element_text(size = 40),strip.text.y = element_text(size = 40))+
+  theme(legend.key.size = unit(3,"line"))+
+  theme(axis.text.y=element_text(size=54, colour = "black"),
+        axis.text.x=element_text(size=50, colour = "black"),
+        axis.title=element_text(size=65,colour = "black"))+
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.6))+
+  
+  
+  
+  
+  theme(axis.ticks = element_line(size = 2,colour = "black"))+
+  theme(axis.ticks.length=unit(0.4, "cm"))+ 
+ theme(legend.position = "none")
+ 
+
+ggsave('C:/Users/Si/Desktop/ggplot06.jpg', width =40, height =40, units = "cm",dpi = 300)
