@@ -1,0 +1,169 @@
+# FV/FM
+
+library(readxl)
+library(ggpubr)
+library(rstatix)
+library(ggplot2)
+library(dplyr)
+ST <- read_excel("C:/Users/Si/Desktop/ST2.xlsx", sheet = "Sheet33")
+attach(ST)
+ST
+
+plot <- ggbarplot(ST, x = "number", y = "size", add = "mean_sd",add.params = list(size = 1.5), fill = "number",
+                  size =1.5,
+                  palette = c("#238b45","#c7e9c0",'#ccebc5','#decbe4','#fed9a6','#ffffcc'),
+                  position = position_dodge(0.8))+
+  stat_compare_means(aes(group = number), label = "p.signif", 
+                     label.y = c(0.9),
+                     label.x = (1.4), method = "t.test",size = 25)
+plot
+plot+ 
+  xlab("")+
+  ylab("Photosynthetic activity (Fv/Fm value)")+
+  scale_y_continuous(
+       limits = c(0,1))+
+theme(legend.title=element_blank())+
+  theme(legend.position = c(0.06,0.96),
+        legend.text=element_text(size=25))+
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(axis.text=element_text(size=52, colour = "black"),
+        axis.title=element_text(size=60,colour = "black"))+
+  theme(strip.text.x = element_text(size = 40),strip.text.y = element_text(size = 40))+
+  theme(axis.ticks = element_line(size = 2,colour = "black"))+
+  theme(axis.ticks.length=unit(0.4, "cm"))+ 
+  theme(legend.position = "none")
+ggsave('C:/Users/Si/Desktop/ggplot06.jpg', width =24, height =40, units = "cm",dpi = 300)
+
+# Pigments
+library(readxl)
+library(ggpubr)
+library(rstatix)
+library(ggplot2)
+library(dplyr)
+ST <- read_excel("C:/Users/Si/Desktop/ST2.xlsx", sheet = "Sheet29")
+attach(ST)
+ST
+ST$type <- factor(ST$type, levels = c("Chl a","Chl b","Carotenoid"
+))
+plot <- ggbarplot(ST, x = "number", y = "size", add = "mean_sd",add.params = list(size = 1.5), fill = "number",
+                  size =1.5,
+                  palette = c("#238b45","#c7e9c0",'#ccebc5','#decbe4','#fed9a6','#ffffcc'),
+                  position = position_dodge(0.8),
+                  facet.by = "type"
+                  )
+ 
+plot
+
+
+plot+ 
+  xlab("Time")+
+  ylab("Weight per cell (pg)")+
+  scale_y_continuous(
+         limits = c(0,25))+
+theme(legend.title=element_blank())+
+  theme(legend.position = c(0.06,0.96),
+        legend.text=element_text(size=25))+
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(axis.text=element_text(size=35, colour = "black"),
+        axis.title=element_text(size=40,colour = "black"),
+        axis.title.x=element_blank())+
+  theme(strip.text.x = element_text(size = 60),strip.text.y = element_text(size = 40))+
+  theme(axis.text.y=element_text(size=54, colour = "black"),
+        axis.text.x=element_text(size=50, colour = "black"),
+        axis.title=element_text(size=65,colour = "black"))+
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.6))+
+  theme(axis.ticks = element_line(size = 2,colour = "black"))+
+  theme(axis.ticks.length=unit(0.4, "cm"))+ 
+  theme(legend.position = "none")
+ggsave('C:/Users/Si/Desktop/ggplot06.jpg', width =55, height =40, units = "cm",dpi = 300)
+
+# Dry weight, lipid, starch
+library(readxl)
+library(ggpubr)
+library(rstatix)
+library(ggplot2)
+library(dplyr)
+ST <- read_excel("C:/Users/Si/Desktop/ST2.xlsx", sheet = "Sheet49")
+attach(ST)
+
+ST
+
+plot <- ggbarplot(ST, x = "number", y = "size", add = "mean_sd",add.params = list(size = 1.5), fill = "number",
+                  size =1.5,
+                  palette = c("#238b45","#c7e9c0",'#ccebc5','#decbe4','#fed9a6','#ffffcc'),
+                  position = position_dodge(0.8),
+                  #error.plot = "upper_errorbar",
+                  facet.by = "type"
+                    )
+plot
+
+
+plot+ 
+  xlab("Time")+
+  ylab("Weight per cell (pg)")+
+    scale_y_continuous(
+     limits = c(0,2000))+
+theme(legend.title=element_blank())+
+  theme(legend.position = c(0.06,0.96),
+        legend.text=element_text(size=25))+
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(axis.text=element_text(size=35, colour = "black"),
+        axis.title=element_text(size=40,colour = "black"),
+        axis.title.x=element_blank())+
+  theme(strip.text.x = element_text(size = 60),strip.text.y = element_text(size = 40))+
+  theme(axis.text.y=element_text(size=54, colour = "black"),
+        axis.text.x=element_text(size=50, colour = "black"),
+        axis.title=element_text(size=65,colour = "black"))+
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.6))+
+  theme(axis.ticks = element_line(size = 2,colour = "black"))+
+  theme(axis.ticks.length=unit(0.4, "cm"))+ 
+  theme(legend.position = "none")
+ggsave('C:/Users/Si/Desktop/ggplot06.jpg', width =57, height =40, units = "cm",dpi = 300)
+
+# lipid ratio & starch ratio
+library(readxl)
+library(ggpubr)
+library(rstatix)
+library(ggplot2)
+library(dplyr)
+ST <- read_excel("C:/Users/Si/Desktop/ST2.xlsx", sheet = "Sheet50")
+attach(ST)
+
+ST
+
+plot <- ggbarplot(ST, x = "number", y = "size", add = "mean_sd",add.params = list(size = 1.5), fill = "number",
+                  size =1.5,
+                  palette = c("#238b45","#c7e9c0",'#ccebc5','#decbe4','#fed9a6','#ffffcc'),
+                  position = position_dodge(0.8)
+)
+
+plot
+plot+ 
+  xlab("Time")+
+  ylab("Weight ratio of cellular dry weight")+
+ scale_y_continuous(
+    limits = c(0,1))+
+theme(legend.title=element_blank())+
+  theme(legend.position = c(0.06,0.96),
+        legend.text=element_text(size=25))+
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(axis.text=element_text(size=35, colour = "black"),
+        axis.title=element_text(size=40,colour = "black"),
+        axis.title.x=element_blank())+
+  theme(strip.text.x = element_text(size = 60),strip.text.y = element_text(size = 40))+
+  theme(axis.text.y=element_text(size=54, colour = "black"),
+        axis.text.x=element_text(size=50, colour = "black"),
+        axis.title=element_text(size=65,colour = "black"))+
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.6))+
+  theme(axis.ticks = element_line(size = 2,colour = "black"))+
+  theme(axis.ticks.length=unit(0.4, "cm"))+ 
+  theme(legend.position = "none")
+ggsave('C:/Users/Si/Desktop/ggplot06.jpg', width =40, height =40, units = "cm",dpi = 300)
+
+
+
+
