@@ -1,1 +1,98 @@
+# Growth curve of Re-diversification
+library(readxl)
+library(ggpubr)
+library(rstatix)
+library(ggplot2)
+library(dplyr)
+ST <- read_excel("C:/Users/Si/Desktop/ST2.xlsx", sheet = "Sheet31")
+attach(ST)
 
+ST
+
+plot <- ggbarplot(ST, x = "time", y = "number", add = "mean_sd",fill = "type",
+                  size =1,
+                  add.params = list(size = 1.5), 
+                  palette = c("#c7e9c0","#238b45",'#ccebc5','#decbe4','#fed9a6','#ffffcc')
+                  ,position = position_dodge(0.8)
+)
+
+plot
+
+plot+ 
+  xlab("Time")+
+  ylab(~ paste("Number of cells ",(mL ^ -1)))+
+  scale_y_continuous(
+     limits = c(0,1*10^5),
+     breaks = seq(0, 1*10^5, by=2*10^4),
+    label= function(x) {ifelse(x==0, "0", 
+                               parse(text=gsub("[+]", "", 
+                                               gsub("e", " %*% 10^", scientific_format()(x)))))})+
+  theme(legend.title=element_blank())+
+  theme(legend.position = c(0.19,0.94),
+        legend.text=element_text(size=50))+
+  theme(legend.key.size = unit(2,"line"))+
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(axis.text=element_text(size=40, colour = "black"),
+        axis.title=element_text(size=50,colour = "black"),
+        axis.title.x=element_blank())+
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.5))+
+  theme(strip.text.x = element_text(size = 35),strip.text.y = element_text(size = 35))+
+  theme(axis.text.y=element_text(size=54, colour = "black"),
+        axis.text.x=element_text(size=50, colour = "black"),
+        axis.title=element_text(size=65,colour = "black"))+
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.6))+
+  theme(axis.ticks = element_line(size = 2,colour = "black"))+
+  theme(axis.ticks.length=unit(0.4, "cm")) 
+
+ggsave('C:/Users/Si/Desktop/ggplot06.jpg', width =45, height =40, units = "cm",dpi = 300)
+
+# Final composition barplot
+library(readxl)
+library(ggpubr)
+library(rstatix)
+library(ggplot2)
+library(dplyr)
+ST <- read_excel("C:/Users/Si/Desktop/ST2.xlsx", sheet = "Sheet31")
+attach(ST)
+
+ST
+
+plot <- ggbarplot(ST, x = "time", y = "number", add = "mean_sd",fill = "type",
+                  size =1,
+                  add.params = list(size = 1.5), 
+                  palette = c("#c7e9c0","#238b45",'#ccebc5','#decbe4','#fed9a6','#ffffcc')
+                  #palette = c('#fee6ce','#fd8d3c','#ccebc5','#decbe4','#fed9a6','#ffffcc'),
+                  ,position = position_dodge(0.8)
+
+)
+
+plot
+
+plot+ 
+  xlab("Time")+
+  ylab(~ paste("Number of cells ",(mL ^ -1)))+
+  scale_y_continuous(
+     limits = c(0,1*10^5),
+     breaks = seq(0, 1*10^5, by=2*10^4),
+    label= function(x) {ifelse(x==0, "0", 
+                               parse(text=gsub("[+]", "", 
+                                               gsub("e", " %*% 10^", scientific_format()(x)))))})+
+  theme(legend.title=element_blank())+
+  theme(legend.position = c(0.19,0.94),
+        legend.text=element_text(size=50))+
+  theme(legend.key.size = unit(2,"line"))+
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(axis.text=element_text(size=40, colour = "black"),
+        axis.title=element_text(size=50,colour = "black"),
+        axis.title.x=element_blank())+
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.5))+
+  theme(strip.text.x = element_text(size = 35),strip.text.y = element_text(size = 35))+
+  theme(axis.text.y=element_text(size=54, colour = "black"),
+        axis.text.x=element_text(size=50, colour = "black"),
+        axis.title=element_text(size=65,colour = "black"))+
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.6))+
+  theme(axis.ticks = element_line(size = 2,colour = "black"))+
+  theme(axis.ticks.length=unit(0.4, "cm")) 
+ggsave('C:/Users/Si/Desktop/ggplot06.jpg', width =45, height =40, units = "cm",dpi = 300)
