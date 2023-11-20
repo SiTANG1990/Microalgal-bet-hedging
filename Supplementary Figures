@@ -1,0 +1,214 @@
+#Contunuous culture
+library(readxl)
+ST <- read_excel("C:/Users/Si/Desktop/ST2.xlsx", sheet = "Sheet52")
+attach(ST)
+ST
+library(reshape2)
+library(dplyr)
+library(ggplot2)
+library(scales)
+melted <- melt(ST, id.vars=c("time"))
+grouped <- group_by(melted,time)
+grouped$time = factor(grouped$time)
+df = summarise(grouped, avg = mean(value), sd = sd(value))
+df
+plot = ggplot(df,aes(y=avg,x=time,group=1))+
+  geom_line(size = 4,color="#fb8072")+
+  geom_point(size=10,pch=21,stroke=1.5)+
+   geom_errorbar(aes(
+    ymin = avg-sd, 
+    ymax = avg + sd),
+    linewidth = 2, 
+    width = 0.2, 
+    position = "identity", colour= "black")
+plot
+plot +xlab("Time (day)")+
+  ylab("Ratio of mobile cells")+
+  scale_y_continuous(
+    limits = c(0,1))+
+   theme_light()+
+  theme(legend.title = element_blank(),legend.position = c(0.14, 0.90),
+        legend.text=element_text(size=45))+
+  theme(legend.key.size = unit(3,"line"))+
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(axis.text=element_text(size=48, colour = "black"),
+        axis.text.x = element_text(size = 45),
+        axis.title=element_text(size=58,colour = "black"))+
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(axis.ticks = element_line(size = 2,colour = "black"))+
+  theme(axis.ticks.length=unit(0.4, "cm"))+
+  guides(color = guide_legend(
+    override.aes=list(shape = 20)))
+#dev.off()
+ggsave('C:/Users/Si/Desktop/ggplot05.jpeg',width =80, height = 40, units ="cm", dpi = 300)
+
+
+
+# Four H. pluvialis strains
+library(readxl)
+ST <- read_excel("C:/Users/Si/Desktop/ST2.xlsx", sheet = "Sheet58")
+attach(ST)
+ST
+library(dplyr)
+library(ggplot2)
+library(scales)
+melted <- melt(ST, id.vars=c("time","type"))
+grouped <- group_by(melted,time,type)
+grouped$time = factor(grouped$time)
+grouped$type = factor(grouped$type)
+df = summarise(grouped, avg = mean(value), sd = sd(value))
+df
+plot = ggplot(df,aes(y=avg,x=time,group=type))+
+  geom_line(size = 4,aes(color=type))+
+  geom_point(size=10,pch=21,stroke=1.5)+
+  scale_color_manual(
+    values=c('#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00'
+    ,'#ffff33','#a65628','#f781bf')
+  )+
+  geom_errorbar(aes(
+    ymin = avg-sd, 
+    ymax = avg + sd),
+    linewidth = 2, 
+    width = 0.2, 
+    position = "identity", colour= "black")
+plot
+plot +xlab("Time (day)")+
+  ylab("Ratio of mobile cells")+
+  scale_y_continuous(
+    limits = c(0,1))+
+  theme_light()+
+  theme(
+    legend.title = element_blank(),
+        legend.position = c(0.84, 0.11),
+        legend.text=element_text(size=45))+
+  theme(legend.key.size = unit(3,"line"))+
+  scale_fill_discrete(name = "New Legend Title")+
+  theme(axis.text=element_text(size=48, colour = "black"),
+        axis.text.x = element_text(size = 45),
+        axis.title=element_text(size=58,colour = "black"))+
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(axis.ticks = element_line(size = 2,colour = "black"))+
+  theme(axis.ticks.length=unit(0.4, "cm"))
+ggsave('C:/Users/Si/Desktop/ggplot05.jpeg',width =44, height = 40, units ="cm", dpi = 300)
+
+
+
+
+# NaCl stress bar plot
+library(readxl)
+library(ggpubr)
+library(dplyr)
+library(rstatix)
+library(multcompView)
+ST <- read_excel("C:/Users/Si/Desktop/ST2.xlsx", sheet = "Sheet53")
+attach(ST)
+ST
+ST$number = factor(ST$number)
+anova <- aov(size ~ number, data = ST)
+summary(anova)
+tukey <- TukeyHSD(anova)
+tukey
+cld <- multcompLetters4(anova, tukey)
+Tk <- group_by(ST, number) %>%
+  summarise(mean=mean(size), quant = quantile(size, probs = 1)) %>%
+  arrange(desc(mean))
+cld <- as.data.frame.list(cld$number)
+Tk$cld <- cld$Letters
+Tk
+plot <- ggbarplot(ST, x = "number", y = "size",add = "mean_se",
+                  fill = "number",
+                  palette = c( '#f2f0f7','#fdd0a2','#fdae6b','#fd8d3c','#e6550d','#a63603','#2171b5','#084594',
+                               '#ffffcc','#e5d8bd','#fddaec','#f2f2f2')
+                  ,size = 1.5
+                  ,width = 0.8
+                  ,add.params = list(size = 1.5)
+                  )+
+  geom_jitter(width = 0.2,size =6, shape=5)
+plot
+plot+ 
+  xlab("NaCl (g/L)")+
+  ylab(~ paste("Increase in cell number ",(mL ^ -1)))+  
+  scale_y_continuous(
+    limits = c(-2*10^4,4*10^4),
+    label= function(x) {ifelse(x==0, "0", parse(text=gsub("[+]", "", 
+                                                          gsub("e", " %*% 10^", scientific_format()(x)))))})+
+        legend.position = c(0.9, 0.9))+
+  theme(legend.position = c(0.85, 0.92),
+        legend.text=element_text(size=45))+
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(axis.text=element_text(size=48, colour = "black"),
+        axis.title=element_text(size=55,colour = "black"))+
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.6))+
+  theme(strip.text.x = element_text(size = 40),strip.text.y = element_text(size = 40))+
+  theme(legend.key.size = unit(3,"line"))+
+  theme(axis.ticks = element_line(size = 2,colour = "black"))+
+  theme(axis.ticks.length=unit(0.4, "cm"))+ 
+  theme(legend.position = "none")
+ggsave('C:/Users/Si/Desktop/ggplot06.jpg', width =40, height =40, units = "cm",dpi = 300)
+
+
+
+
+
+
+# NaCl stress Ratio of mobile cells
+library(readxl)
+ST <- read_excel("C:/Users/Si/Desktop/ST2.xlsx", sheet = "Sheet55")
+attach(ST)
+ST
+library(reshape2)
+library(dplyr)
+library(ggplot2)
+library(scales)
+melted <- melt(ST, id.vars=c("time","type"))
+grouped <- group_by(melted,time,type)
+grouped$time = factor(grouped$time)
+grouped$type = factor(grouped$type)
+df = summarise(grouped, avg = mean(value), sd = sd(value))
+df
+plot = ggplot(df,aes(y=avg,x=time,group=type))+
+  geom_line(size = 4,aes(color=type))+
+  geom_point(size=10,pch=21,stroke=1.5)+
+  scale_color_manual(
+    values=c('#f2f0f7','#fdd0a2','#fdae6b','#fd8d3c','#e6550d')
+  )+
+  geom_errorbar(aes(
+    ymin = avg-sd, 
+    ymax = avg + sd),
+    linewidth = 2, 
+    width = 0.2, 
+    position = "identity", colour= "black")
+plot
+plot +xlab("Time (day)")+
+  ylab("Ratio of mobile cells")+
+  scale_y_continuous(
+    limits = c(0,1))+
+theme_light()+
+  theme(
+    legend.title = element_blank(),
+        legend.text=element_text(size=45))+
+  theme(legend.key.size = unit(3,"line"))+
+  guides(fill=guide_legend(title="NaCl"))+ 
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(axis.text=element_text(size=48, colour = "black"),
+        axis.text.x = element_text(size = 45),
+        axis.title=element_text(size=58,colour = "black"))+
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(axis.ticks = element_line(size = 2,colour = "black"))+
+  theme(axis.ticks.length=unit(0.4, "cm"))+
+  guides(color = guide_legend(
+    override.aes=list(shape = 20)))
+ggsave('C:/Users/Si/Desktop/ggplot05.jpeg',width =44, height = 40, units ="cm", dpi = 300)
+
+
+
+
+
+
+
