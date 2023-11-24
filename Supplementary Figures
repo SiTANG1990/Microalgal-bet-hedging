@@ -207,6 +207,114 @@ theme_light()+
 ggsave('C:/Users/Si/Desktop/ggplot05.jpeg',width =44, height = 40, units ="cm", dpi = 300)
 
 
+# NaCl stress growth curve
+library(readxl)
+ST <- read_excel("C:/Users/Si/Desktop/ST2.xlsx", sheet = "Sheet59")
+attach(ST)
+ST
+library(reshape2)
+library(dplyr)
+library(ggplot2)
+library(scales)
+melted <- melt(ST, id.vars=c("time","type"))
+grouped <- group_by(melted,time,type)
+grouped$time = factor(grouped$time)
+grouped$type = factor(grouped$type)
+df = summarise(grouped, avg = mean(value), sd = sd(value))
+df
+plot = ggplot(df,aes(y=avg,x=time,group=type))+
+  geom_line(size = 4,aes(color=type))+
+  geom_point(size=10,pch=21,stroke=1.5)+
+  scale_color_manual(
+    values=c('#f2f0f7','#fee0d2','#fc9272','#cb181d','#99000d')
+  )+
+ geom_errorbar(aes(
+    ymin = avg-sd, 
+    ymax = avg + sd),
+    linewidth = 2, 
+    width = 0.2, 
+    position = "identity", colour= "black")
+plot
+plot +xlab("Time (day)")+
+  ylab(~ paste("Number of cells ",(mL ^ -1)))+
+  scale_y_continuous(
+    limits = c(0,8*10^4),
+     breaks = seq(0, 8*10^4, by=2*10^4),
+    label= function(x) {ifelse(x==0, "0", 
+                               parse(text=gsub("[+]", "", 
+                                               gsub("e", " %*% 10^", scientific_format()(x)))))})+  
+theme_light()+
+  theme(
+    legend.title = element_blank(),
+        legend.position = c(0.08, 0.84),
+        legend.text=element_text(size=45))+
+  theme(legend.key.size = unit(3,"line"))+
+  theme(axis.text=element_text(size=48, colour = "black"),
+        axis.text.x = element_text(size = 45),
+        axis.title=element_text(size=58,colour = "black"))+
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(axis.ticks = element_line(size = 2,colour = "black"))+
+  theme(axis.ticks.length=unit(0.4, "cm"))
+ggsave('C:/Users/Si/Desktop/ggplot05.jpeg',width =44, height = 40, units ="cm", dpi = 300)
+
+
+
+#NaCl stress population dynamics over time
+library(readxl)
+ST <- read_excel("C:/Users/Si/Desktop/ST2.xlsx", sheet = "Sheet60")
+attach(ST)
+library(reshape2)
+library(dplyr)
+melted <- melt(ST, id.vars=c("salinity", "length","type"))
+grouped <- group_by(melted, salinity, length,type)
+grouped$salinity = factor(grouped$salinity)
+df = summarise(grouped, avg = mean(value), sd = sd(value))
+df
+df$y_pos = NA
+df$y_pos[df$length == "Non-mobile"] = df$avg[df$length == "Non-mobile"]
+df$y_pos[df$length == "Mobile"] = df$avg[df$length == "Non-mobile"] + 
+  df$avg[df$length == "Mobile"]
+library(ggplot2)
+library(scales)
+plot = ggplot(df,aes(fill=length,y= avg,x=salinity))+
+  geom_bar(stat="identity", color="black",size=1)+
+  facet_wrap(.~type, nrow=2)+
+  geom_errorbar(
+    aes(ymax = y_pos + sd, ymin=y_pos), 
+    position = "identity", width = 0.2, size=1)+
+  scale_fill_manual(values = c("#c7e9c0","#238b45"))
+plot
+plot + 
+  xlab("Time (day)")+
+  ylab("Proportion of each phenotype")+
+  scale_y_continuous(
+    limits = c(0,1.15),
+   breaks = seq(0, 1.15, by=0.2))+
+  theme_light()+
+   theme(legend.position = c(0.06, 0.965),
+         legend.text=element_text(size=40), legend.title=element_text(size=35))+
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(legend.title = element_blank())+
+  theme(axis.text.y=element_text(size=54, colour = "black"),
+        axis.text.x=element_text(size=50, colour = "black"),
+        axis.title=element_text(size=65,colour = "black"))+
+  theme(strip.text.x = element_blank(),strip.text.y = element_text(size = 40))+
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2))+
+  theme(axis.ticks = element_line(size = 2,colour = "black"))+
+  theme(axis.ticks.length=unit(0.4, "cm")) +
+  theme(strip.text.x = element_text(size = 45,colour = "black"),
+        strip.text.y = element_text(size = 45, colour = "black"))+
+  theme(strip.background.x =element_rect(fill="#e0e0e0"))+
+  theme(strip.background.y =element_rect(fill="#4ebad6"))+
+  theme(axis.ticks = element_line(size = 2,colour = "black"))+
+  theme(axis.ticks.length=unit(0.4, "cm")) 
+ggsave('C:/Users/Si/Desktop/ggplot05.jpg', width =80, height =60, units = "cm",dpi = 300)
+
+
+
 
 
 
